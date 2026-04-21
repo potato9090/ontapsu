@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ôn Tập Lịch Sử 12 - Học Kỳ 2</title>
+    <title>Ôn Tập Lịch Sử 12 - Thứ Tự Bài Học</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --card: #ffffff;
             --text: #1e293b;
             --success: #22c55e;
             --error: #ef4444;
+            --lesson-bg: #e2e8f0;
         }
 
         body {
@@ -21,70 +22,94 @@
             color: var(--text);
             margin: 0;
             padding: 20px;
+            line-height: 1.6;
         }
 
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 850px; margin: 0 auto; }
 
         header {
             text-align: center;
             margin-bottom: 30px;
-            background: #1e293b;
+            background: linear-gradient(135deg, #1e293b, #334155);
             color: white;
-            padding: 25px;
+            padding: 30px;
             border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .lesson-header {
+            background: var(--lesson-bg);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            margin: 30px 0 15px 0;
+            color: #0f172a;
+            border-left: 5px solid var(--primary);
+            font-size: 1.2rem;
+            text-transform: uppercase;
         }
 
         .quiz-card {
             background: var(--card);
             padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
         }
 
-        .q-header { font-weight: 700; margin-bottom: 15px; display: block; }
+        .q-text { font-weight: 700; margin-bottom: 15px; display: block; }
 
-        .options-group { display: grid; gap: 10px; }
+        .options-group { display: grid; gap: 8px; }
 
         .option {
-            padding: 12px;
-            border: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             cursor: pointer;
             transition: 0.2s;
+            font-size: 0.95rem;
         }
 
-        .option:hover { background: #f8fafc; border-color: var(--primary); }
+        .option:hover { background: #f1f5f9; border-color: var(--primary); }
         .option.selected { background: #dbeafe; border-color: var(--primary); }
-        .option.correct { background: #dcfce7; border-color: var(--success); color: #15803d; font-weight: 600; }
-        .option.wrong { background: #fee2e2; border-color: var(--error); color: #b91c1c; }
+        .option.correct { background: #dcfce7 !important; border-color: var(--success) !important; color: #15803d; font-weight: 600; }
+        .option.wrong { background: #fee2e2 !important; border-color: var(--error) !important; color: #b91c1c; }
 
         .controls {
             position: sticky;
             bottom: 20px;
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
             padding: 20px 0;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(8px);
         }
 
         button {
-            padding: 12px 25px;
+            padding: 14px 30px;
             border: none;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 8px;
+            font-weight: 700;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .btn-submit { background: var(--primary); color: white; }
         .btn-reset { background: #64748b; color: white; }
-        #result {
-            font-size: 1.5rem;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
+
+        #result-summary {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            border: 2px solid var(--primary);
             display: none;
+            z-index: 100;
         }
     </style>
 </head>
@@ -92,163 +117,183 @@
 
 <div class="container">
     <header>
-        <h1>ÔN TẬP LỊCH SỬ 12 - HKII</h1>
-        <p>THPT PHÚ NHUẬN - NĂM HỌC 2025-2026</p>
+        <h1>HỆ THỐNG ÔN TẬP LỊCH SỬ 12</h1>
+        <p>Học kỳ II - Theo trình tự bài học</p>
     </header>
 
-    <div id="result"></div>
-    <div id="quiz-container"></div>
+    <div id="result-summary"></div>
+    <div id="main-quiz"></div>
 
     <div class="controls">
-        <button class="btn-reset" onclick="location.reload()">Làm bộ đề mới (Trộn lại)</button>
-        <button class="btn-submit" id="submit-btn" onclick="checkAnswers()">Nộp bài</button>
+        <button class="btn-reset" onclick="location.reload()">Làm lại từ đầu (Đảo đáp án)</button>
+        <button class="btn-submit" id="submit-btn" onclick="checkAll()">Nộp bài & Chấm điểm</button>
     </div>
 </div>
 
 <script>
-    const data = [
-        // BÀI 10
-        { q: "Đường lối đổi mới của Đảng cộng sản Việt Nam đề ra lần đầu tiên tại", a: ["Đại hội Đảng toàn quốc lần thứ IV.", "Đại hội Đảng toàn quốc lần thứ V.", "Đại hội Đảng toàn quốc lần thứ VI.", "Đại hội Đảng toàn quốc lần thứ VII."], c: "Đại hội Đảng toàn quốc lần thứ VI." },
-        { q: "Đảng Cộng sản Việt Nam tiến hành công cuộc đổi mới nhằm", a: ["khắc phục sai lầm khuyết điểm, đưa đất nước vượt qua khủng hoảng", "đưa đất nước hội nhập với xu thế phát triển của thế giới", "thu hút vốn đầu tư, kĩ thuật của nước ngoài, phát triển kinh tế đối ngoại", "thu hút vốn đầu tư, kĩ thuật của nước ngoài, đưa đất nước nhanh chóng trở thành nước công nghiệp"], c: "khắc phục sai lầm khuyết điểm, đưa đất nước vượt qua khủng hoảng" },
-        { q: "Trong những năm 80 của thế kỷ XX, tác động lớn nhất của tình hình thế giới đến công cuộc đổi mới của Việt Nam là", a: ["Cuộc khủng hoảng toàn diện, trầm trọng của các nước tư bản chủ nghĩa do tác động của cuộc khủng hoảng năng lượng.", "Chính sách diễn biến hòa bình của Hoa Kì.", "Cuộc khủng hoảng toàn diện, trầm trọng của Liên Xô, các nước xã hội chủ nghĩa", "Cuộc chiến tranh lạnh chấm dứt."], c: "Cuộc khủng hoảng toàn diện, trầm trọng của Liên Xô, các nước xã hội chủ nghĩa" },
-        { q: "Đổi mới đất nước đi lên CNXH không phải là thay đổi", a: ["Lí tưởng của CNXH", "Lí luận chủ nghĩa Mác- Lênin.", "Con đường tiến lên CNXH.", "Mục tiêu của CNXH."], c: "Lí luận chủ nghĩa Mác- Lênin." },
-        { q: "Nội dung của ba chương trình kinh tế lớn được Đảng đề ra trong kế hoạch 5 năm 1986- 1990 là", a: ["công, nông, ngư nghiệp.", "lương thực, thực phẩm, hàng tiêu dùng, hàng xuất khẩu.", "công nghiệp, nông nghiệp, thương mại dịch vụ.", "công nghiệp, nông nghiệp, xây dựng"], c: "lương thực, thực phẩm, hàng tiêu dùng, hàng xuất khẩu." },
-        { q: "Đảng Cộng sản Việt Nam phải tiếp tục hoàn thiện, bổ sung đường lối Đổi mới được đề ra từ Đại hội đại biểu toàn quốc lần thứ VI (1986) xuất phát từ", a: ["yêu cầu phù hợp với thực tế.", "điểm xuất phát còn quá thấp.", "đảm bảo an ninh - quốc phòng.", "yêu cầu của Trung Quốc."], c: "yêu cầu phù hợp với thực tế." },
-        { q: "Đại hội đại biểu toàn quốc lần thứ VIII của Đảng Cộng sản Việt Nam đã xác định nội dung nào sau đây là quốc sách hàng đầu?", a: ["Khoa học, giáo dục.", "Kinh tế và chính trị.", "An ninh, quốc phòng.", "Giáo dục và đào tạo."], c: "Giáo dục và đào tạo." },
-        { q: "Đảng Cộng sản Việt Nam tiến hành công cuộc đổi mới đất nước từ tháng 12/1986 trong bối cảnh", a: ["Hệ thống xã hội chủ nghĩa thế giới hình thành.", "Mỹ đã phá thế bao vây, cấm vận với Việt Nam.", "Đất nước đang trên đà phát triển rất mạnh mẽ.", "Liên Xô đang tiến hành công cuộc cải tổ."], c: "Liên Xô đang tiến hành công cuộc cải tổ." },
-        { q: "Nhiệm vụ trung tâm của công cuộc Đổi mới ở Việt Nam trong giai đoạn 1996 - 2006 là", a: ["tiến hành một cách toàn diện và đồng bộ trên các lĩnh vực kinh tế, chính trị.", "gắn tăng trưởng, phát triển kinh tế với thực hiện tiến bộ và công bằng xã hội.", "đẩy mạnh công nghiệp hoá, hiện đại hoá và hội nhập kinh tế quốc tế.", "Chú trọng phát triển nền văn hoá tiên tiến, đậm đà bản sắc dân tộc."], c: "đẩy mạnh công nghiệp hoá, hiện đại hoá và hội nhập kinh tế quốc tế." },
-        { q: "Trong sự nghiệp đổi mới đất nước (từ năm 1986), Việt Nam có chủ trương nào sau đây?", a: ["Phát triển kinh tế kế hoạch hóa tập trung.", "Tập trung cải tạo công thương nghiệp.", "Xóa bỏ sự tồn tại của thị trường tự do.", "Mở rộng quan hệ kinh tế đối ngoại."], c: "Mở rộng quan hệ kinh tế đối ngoại." },
-
-        // BÀI 11
-        { q: "Về chính trị, trong thời kì Đổi mới, Việt Nam đã đạt được thành tựu tiêu biểu nào sau đây?", a: ["Xây dựng Nhà nước pháp quyền xã hội chủ nghĩa.", "Xây dựng được mô hình Nhà nước chuyên chính vô sản.", "Xoá bỏ chế độ phong kiến, xây dựng chế độ mới, dân chủ.", "Thay đổi phương hướng tiến lên chủ nghĩa xã hội."], c: "Xây dựng Nhà nước pháp quyền xã hội chủ nghĩa." },
-        { q: "Cơ cấu các ngành kinh tế của Việt Nam năm 2020 là", a: ["nông nghiệp – công nghiệp và xây dựng – dịch vụ và thương mại.", "công nghiệp nhẹ và khai thác khoáng sản – nông nghiệp - dịch vụ.", "dịch vụ – công nghiệp và xây dựng – nông nghiệp, lâm nghiệp và thuỷ sản.", "công nghiệp, xây dựng và khai thác khoáng sản - thương mại - dịch vụ."], c: "dịch vụ – công nghiệp và xây dựng – nông nghiệp, lâm nghiệp và thuỷ sản." },
-        { q: "Trong thời kì Đôi mới, Việt Nam đạt được thành tựu văn hoá – xã hội nào sau đây?", a: ["Giải quyết được vấn đề lao động và việc làm.", "Xoá bỏ được tình trạng lao động thất nghiệp.", "Chỉ số phát triển con người đứng đầu ASEAN.", "Miễn phí mọi chi phí về y tế cho nhân dân."], c: "Giải quyết được vấn đề lao động và việc làm." },
-        { q: "Thực tiễn của công cuộc đổi mới đất nước (từ năm 1986) đã để lại bài học kinh nghiệm gì cho công cuộc xây dựng và bảo vệ tổ quốc hiện nay?", a: ["Kiên trì mục tiêu độc lập dân tộc và chủ nghĩa xã hội.", "Dựa hoàn toàn vào nội lực để phát triển đất nước.", "Đổi mới phải toàn diện nhưng trọng tâm là đổi mới chính trị.", "Phát huy vai trò chủ động, sáng tạo của giai cấp công nhân."], c: "Kiên trì mục tiêu độc lập dân tộc và chủ nghĩa xã hội." },
-        { q: "Một trong những thành tựu quan trọng nhất của công cuộc Đổi mới ở Việt Nam là", a: ["đưa đất nước trở thành nước đang phát triển có thu nhập cao.", "đưa đất nước trở thành nước phát triển có thu nhập trung bình.", "đưa đất nước vượt qua khủng hoảng về văn hoá – xã hội.", "đưa đất nước vượt qua khủng hoảng về kinh tế – xã hội."], c: "đưa đất nước vượt qua khủng hoảng về kinh tế – xã hội." },
-        { q: "Một trong những thành tựu lớn của công cuộc Đổi mới ở Việt Nam là", a: ["từng bước hình thành và hoàn thiện hệ thống chính quyền cơ sở ở các địa phương.", "từng bước hình thành và phát triển nền kinh tế thị trường định hướng xã hội chủ nghĩa.", "hoàn thành mục tiêu xoá đói, giảm nghèo ở các địa phương vùng sâu, vùng xa.", "xây dựng thành công nên văn hoá tiên tiến, đậm đà bản sắc dân tộc."], c: "từng bước hình thành và phát triển nền kinh tế thị trường định hướng xã hội chủ nghĩa." },
-        { q: "Nền văn hóa tiên tiến, đậm đà bản sắc dân tộc trong thời kỳ Đổi mới ở Việt Nam chú trọng điều gì?", a: ["Bảo tồn và phát huy giá trị văn hóa truyền thống", "Xây dựng nhiều trung tâm thương mại", "Tăng cường nhập khẩu sản phẩm văn hóa từ nước ngoài", "Đẩy mạnh giao lưu văn hóa với các nước tư bản"], c: "Bảo tồn và phát huy giá trị văn hóa truyền thống" },
-        { q: "Quá trình nào sau đây cho thấy công cuộc Đổi mới ở Việt Nam hiện nay đang tiếp tục được đẩy mạnh?", a: ["Hoàn thành cải cách nền giáo dục.", "Hội nhập quốc tế toàn diện, sâu rộng.", "Hoàn thành quá trình hội nhập khu vực về văn hoá.", "Thoát khỏi khủng hoảng nợ công ở khu vực và toàn cầu."], c: "Hội nhập quốc tế toàn diện, sâu rộng." },
-        { q: "Việc đổi mới toàn diện đất nước ở Việt Nam từ năm 1986 đã có tác động như thế nào đến vị thế của Việt Nam trên trường quốc tế?", a: ["Tăng cường quan hệ với các nước tư bản chủ nghĩa", "Việt Nam trở thành thành viên của các tổ chức quốc tế quan trọng như ASEAN và WTO", "Việt Nam giảm sự phụ thuộc vào các nước xã hội chủ nghĩa", "Việt Nam không thay đổi vị thế trên trường quốc tế"], c: "Việt Nam trở thành thành viên của các tổ chức quốc tế quan trọng như ASEAN và WTO" },
-        { q: "Bài học kinh nghiệm cơ bản nào được Đảng Cộng sản Việt Nam rút ra trong quá trình tổ chức và lãnh đạo đất nước từ công cuộc đổi mới (12-1986) đến nay?", a: ["Kết hợp giữa sức mạnh dân tộc với sức mạnh thời đại.", "Phát huy tối đa sức mạnh đại đoàn kết toàn dân tộc.", "Tôn trọng quy luật kinh tế - xã hội, bám sát thực tiễn đề ra chủ trương phù hợp.", "Tăng cường sự lãnh đạo của Đảng, Nhà nước đối với cách mạng Việt Nam."], c: "Tôn trọng quy luật kinh tế - xã hội, bám sát thực tiễn đề ra chủ trương phù hợp." },
-
-        // BÀI 12
-        { q: "Đầu thế kỉ XX, một số nhà yêu nước Việt Nam đã có những hoạt động đối ngoại bước đầu nhằm mục tiêu", a: ["thống nhất đất nước", "Giải phóng giai cấp", "Đi lên chủ nghĩa xã hội", "Giải phóng dân tộc."], c: "Giải phóng dân tộc." },
-        { q: "Trong giai đoạn 1905 – 1909, Phan Bội Châu có hoạt động đối ngoại nào sau đây?", a: ["Tổ chức phong trào Duy Tân", "Tổ chức phong trào Đông du", "Cầu viện sự giúp đỡ của Pháp.", "Cầu viện sự giúp đỡ của Anh."], c: "Tổ chức phong trào Đông du" },
-        { q: "Trong giai đoạn 1941 – 1945, Đảng Cộng sản Đông Dương đã có nhiều hoạt động đối ngoại nhằm tranh thủ sự ủng hộ của lực lượng", a: ["Đồng minh", "phát xít", "quân phiệt", "phong kiến"], c: "Đồng minh" },
-        { q: "Trong giai đoạn 1930 – 1940, Đảng Cộng sản Đông Dương đã duy trì quan hệ với tổ chức nào sau đây?", a: ["Liên minh châu Âu.", "Liên hợp quốc.", "Quốc tế Cộng sản.", "Hiệp hội các quốc gia Đông Nam Á."], c: "Quốc tế Cộng sản." },
-        { q: "Đầu thế kỉ XX, Phan Châu Trinh có hoạt động đối ngoại nào sau đây?", a: ["Đề nghị Pháp cải cách chế độ cai trị", "Sáng lập Hội Liên hiệp thuộc địa.", "Khởi xướng phong trào Đông Du.", "Sáng lập Đảng Cộng sản Pháp."], c: "Đề nghị Pháp cải cách chế độ cai trị" },
-        { q: "Mục đích thực hiện các hoạt động đối ngoại của Phan Chu Trinh là", a: ["vận động cải cách và duy tân.", "tiến hành khởi nghĩa vũ trang.", "tập hợp lực lượng cách mạng.", "xin viện trợ các nước châu Âu."], c: "vận động cải cách và duy tân." },
-        { q: "Một trong những nội dung thể hiện sự khác biệt về đối tượng của các hoạt động đối ngoại giữa Phan Bội Châu và Nguyễn Ái Quốc là", a: ["Nguyễn Ái Quốc đi sang phương Tây.", "Phan Bội Châu trông cậy vào Nhật Bản.", "không có sự ảo tưởng vào thực dân Pháp.", "khuynh hướng cứu nước dân chủ tư sản."], c: "Phan Bội Châu trông cậy vào Nhật Bản." },
-        { q: "Hoạt động đối ngoại của Phan Bội Châu đầu thế kỉ XX chủ yếu diễn ra ở những quốc gia nào sau đây?", a: ["Nhật Bản, Trung Quốc", "Trung Quốc, Ấn Độ", "Anh, Pháp", "Liên Xô, Mỹ"], c: "Nhật Bản, Trung Quốc" },
-        { q: "Năm 1919, Nguyễn Ái Quốc có hoạt động đối ngoại nào sau đây?", a: ["Sang Liên Xô dự lễ tang Lênin, nghiên cứu chủ nghĩa Mác.", "Tham dự Đại hội Tua, bỏ phiếu tán thành gia nhập Quốc tế Ba.", "Gửi bản yêu sách của Nhân dân An Nam đến hội nghị Véc-xai.", "Tham gia đoàn cố vấn cao cấp của Liên Xô đến Trung Quốc."], c: "Gửi bản yêu sách của Nhân dân An Nam đến hội nghị Véc-xai." },
-        { q: "Hoạt động đối ngoại của Phan Bội Châu và Phan Châu Trinh đầu thế kỉ XX đều nhằm mục đích nào sau đây?", a: ["Tranh thủ sự giúp đỡ đối với cách mạng trong nước.", "Liên minh với nước ngoài chống chiến tranh thế giới.", "Đoàn kết quốc tế chống chủ nghĩa ly khai, khủng bố.", "Thành lập mặt trận chung chống đế quốc Mỹ xâm lược."], c: "Tranh thủ sự giúp đỡ đối với cách mạng trong nước." },
-
-        // BÀI 13
-        { q: "Một trong những quốc gia Việt Nam đã bình thường hóa quan hệ ngoại giao từ sau 1986 đến nay là", a: ["Mỹ.", "Ấn Độ.", "Nga.", "Lào."], c: "Mỹ." },
-        { q: "Từ năm 1986 đến nay, Việt Nam đã ký các hiệp ước về biên giới trên đất liền với quốc gia nào sau đây?", a: ["Trung Quốc.", "Hàn Quốc.", "Liên Xô.", "Triều Tiên."], c: "Trung Quốc." },
-        { q: "Năm 1950, quốc gia đầu tiên trên thế giới thiết lập quan hệ ngoại giao với nước Việt Nam Dân chủ Cộng hoà là:", a: ["Liên Xô.", "Trung Quốc.", "Cộng hoà Dân chủ Đức.", "Cộng hoà Liên bang Đức."], c: "Trung Quốc." },
-        { q: "Nhà nước Việt Nam Dân chủ Cộng hoà sau khi mới ra đời đã thực hiện các hoạt động đối ngoại nhằm", a: ["bảo vệ chính quyền, thống nhất đất nước, hoàn thành cách mạng dân tộc dân chủ nhân dân.", "tranh thủ sự ủng hộ của quốc tế đối với sự nghiệp đấu tranh bảo vệ độc lập dân tộc.", "tránh đối đầu cùng lúc nhiều kẻ thù, từng bước đánh bại quân Tưởng và Trung Hoa Dân Quốc.", "tránh chiến tranh, đàm phán thương lượng bằng mọi giá, đặc biệt là với Chính phủ Pháp."], c: "tranh thủ sự ủng hộ của quốc tế đối với sự nghiệp đấu tranh bảo vệ độc lập dân tộc." },
-        { q: "Sau sự kiện nào sau đây đã buộc Mỹ phải ngồi vào bàn đàm phán với Chính phủ nước Việt Nam Dân chủ Cộng hòa?", a: ["Vạn Tường.", "Đồng Xoài.", "cuộc tổng tiến công và nỗi dậy Mậu Thân.", "Núi Thành."], c: "cuộc tổng tiến công và nỗi dậy Mậu Thân." },
-        { q: "Sự phối hợp hoạt động ngoại giao giữa Việt Nam Dân chủ Cộng hòa và Chính phủ cách mạng lâm thời Cộng hòa miền Nam đã góp phần", a: ["thiết lập quan hệ ngoại giao với 20 quốc gia trên thế giới.", "buộc Mỹ phải kí Hiệp định Pa-ri về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam.", "tăng cường đoàn kết và giúp đỡ các nước xã hội chủ nghĩa.", "thúc đẩy hình thành mặt trận thế giới đoàn kết với các quốc gia."], c: "buộc Mỹ phải kí Hiệp định Pa-ri về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam." },
-        { q: "Nội dung nào dưới đây không phải là hoạt động đối ngoại của Việt Nam giai đoạn 1954-1964?", a: ["Thúc đẩy hình thành Mặt trận Tổ quốc Việt Nam.", "Đấu tranh chống lại các chính sách và hành động phá hoại hiệp định của Mỹ - Diệm.", "Tăng cường đoàn kết ba dân tộc Đông Dương.", "Mở rộng quan hệ với các nước xã hội chủ nghĩa và các nước vừa giành được độc lập."], c: "Thúc đẩy hình thành Mặt trận Tổ quốc Việt Nam." },
-        { q: "Các hoạt động đối ngoại mà nước Việt Nam dân chủ Cộng hòa tiến hành từ sau Cách mạng tháng Tám phải tuân thủ nguyên tắc nào sau đây?", a: ["Không vi phạm đến chủ quyền dân tộc.", "Không nhân nhượng thỏa hiệp với Pháp.", "Nhân nhượng tất cả yêu cầu của Tưởng.", "Giải quyết xung đột bằng thương lượng."], c: "Không vi phạm đến chủ quyền dân tộc." },
-        { q: "Nội dung nào sau đây thể hiện mục đích của việc Chủ tịch Hồ Chí Minh ký với Pháp bản Tạm ước ngày 14/9/1946", a: ["Kéo dài thời gian hòa bình để chuẩn bị kháng chiến.", "Tranh thủ thời gian để điều động bộ đội từ Nam ra.", "Đợi chi viện từ các nước xã hội chủ nghĩa.", "Tranh thủ khi lực lượng Pháp còn yếu để đàm phán."], c: "Kéo dài thời gian hòa bình để chuẩn bị kháng chiến." },
-        { q: "Thắng lợi nào sau đây đã buộc Mỹ phải chấp nhận ký Hiệp định Pa-ri?", a: ["Điện Biên Phủ trên không.", "Tiến công chiến lược 1972.", "Chiến dịch Huế-Đà Nẵng.", "Chiến dịch Hồ Chí Minh."], c: "Điện Biên Phủ trên không." },
-
-        // BÀI 14 (Hồ Chí Minh)
-        { q: "Hồ Chí Minh lúc nhỏ tên là", a: ["Nguyễn Văn Ba.", "Nguyễn Sinh Sắc.", "Nguyễn Ái Quốc.", "Nguyễn Sinh Cung."], c: "Nguyễn Sinh Cung." },
-        { q: "Nội dung nào dưới đây không phải là hoạt động cách mạng của Hồ Chí Minh giai đoạn từ năm 1941 đến năm 1945?", a: ["Sáng lập Việt Nam độc lập đồng minh (Việt Minh).", "Ra Chỉ thị Đội Việt Nam Tuyên truyền Giải phóng quân.", "Lãnh đạo xây dựng và bảo vệ chính quyền, chống thù trong giặc ngoài.", "Đọc bản Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hòa."], c: "Lãnh đạo xây dựng và bảo vệ chính quyền, chống thù trong giặc ngoài." },
-        { q: "Từ năm 1945 đến năm 1969, Hồ Chí Minh đảm nhận cương vị nào sau đây?", a: ["Chủ tịch nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Tổng Bí thư nước Việt Nam Dân chủ Cộng hòa.", "Tổng Bí thư nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Chủ tịch nước Việt Nam Dân chủ Cộng hòa."], c: "Chủ tịch nước Việt Nam Dân chủ Cộng hòa." },
-        { q: "Chủ tịch Hồ Chí Minh xuất thân trong một gia đình", a: ["nhà nho yêu nước.", "tiểu tư sản trí thức.", "bần cố nông.", "tư sản dân tộc."], c: "nhà nho yêu nước." },
-        { q: "Văn kiện nào sau đây được Nguyễn Ái Quốc thay mặt những người Việt Nam yêu nước ở Pháp gửi đến Hội nghị Véc-xai năm 1919?", a: ["Tuyên ngôn Quốc tế Nhân quyền.", "Bản Yêu sách của nhân dân An Nam.", "Đường Kách mệnh.", "Bản án chế độ thực dân Pháp."], c: "Bản Yêu sách của nhân dân An Nam." },
-        { q: "Nội dung nào sau đây không phải là yếu tố ảnh hưởng đến quyết định ra đi tìm đường cứu nước của Nguyễn Tất Thành năm 1911?", a: ["Đất nước bị thực dân Pháp xâm lược, thống trị.", "Sự thất bại, bế tắc của các phong trào yêu nước.", "Ý chí, quyết tâm cứu nước của Nguyễn Tất Thành.", "Tác động của cuộc Cách mạng tháng Mười Nga."], c: "Tác động của cuộc Cách mạng tháng Mười Nga." },
-        { q: "Nguyễn Ái Quốc đã tìm ra con đường cứu nước, giải phóng dân tộc Việt Nam khi đang hoạt động ở đâu?", a: ["Anh.", "Pháp.", "Mỹ.", "Trung Quốc."], c: "Pháp." },
-        { q: "Tháng 12-1920 đánh dấu bước ngoặt trong cuộc đời hoạt động của Nguyễn Ái Quốc với việc người trở thành:", a: ["người cộng sản đầu tiên của Việt Nam.", "lãnh tụ của cách mạng Việt Nam.", "đảng viên của Đảng Cộng sản Việt Nam.", "Chủ tịch nước Việt Nam Dân chủ Cộng hòa."], c: "người cộng sản đầu tiên của Việt Nam." },
-        { q: "Yếu tố quyết định đến sự lựa chọn khuynh hướng cứu nước của Nguyễn Ái Quốc năm 1920 là", a: ["hoàn cảnh đất nước mất độc lập, chủ quyền.", "tác động của thế kỉ giải trừ chủ nghĩa thực dân.", "sự thất bại của khuynh hướng cứu nước tư sản.", "tầm nhìn, trí tuệ và bản lĩnh của Nguyễn Ái Quốc."], c: "tầm nhìn, trí tuệ và bản lĩnh của Nguyễn Ái Quốc." },
-        { q: "Đầu năm 1930, Nguyễn Ái Quốc phải tiến hành triệu tập hội nghị để hợp nhất các tổ chức cộng sản là do:", a: ["cách mạng Việt Nam đứng trước nguy cơ chia rẽ.", "thực hiện chỉ đạo trực tiếp của Quốc tế cộng sản.", "thực hiện yêu cầu của nhân dân ba nước Đông Dương.", "thực hiện yêu cầu của đại diện ba tổ chức cộng sản."], c: "cách mạng Việt Nam đứng trước nguy cơ chia rẽ." },
-        { q: "Trong hành trình tìm đường cứu nước, từ năm 1912 đến năm 1930, Nguyễn Tất Thành không đặt chân đến quốc gia nào sau đây?", a: ["Trung Quốc.", "Liên Xô.", "Nhật Bản.", "Thái Lan."], c: "Nhật Bản." },
-        { q: "Nguyễn Tất Thành tham gia hoạt động trong tổ chức nào sau đây ở Pháp năm 1918?", a: ["Đảng Xã hội Pháp.", "Hội liên hiệp thuộc địa.", "Đảng Dân chủ.", "Đảng Cộng sản Pháp."], c: "Đảng Xã hội Pháp." },
-        { q: "Nguyễn Ái Quốc lấy tên gọi Hồ Chí Minh lần đầu tiên khi", a: ["sang Xiêm hoạt động trong cộng đồng Việt kiều yêu nước (1928).", "bi bị chính quyền Anh bắt giam ở Hồng Công (1931).", "hoạt động ở Trung Quốc, chuẩn bị về nước (1938).", "sang Trung Quốc để vận động ngoại giao (1942)."], c: "sang Trung Quốc để vận động ngoại giao (1942)." },
-        { q: "Nguyên nhân quyết định thành công của hội nghị thành lập Đảng Cộng sản Việt Nam (đầu năm 1930) là", a: ["do tài năng, uy tín của Nguyễn Ái Quốc.", "sự chỉ đạo kịp thời của Đảng cộng sản Pháp.", "sự giúp đỡ của Lê-nin và Quốc tế cộng sản.", "nguyện vọng của các tổ chức cộng sản."], c: "do tài năng, uy tín của Nguyễn Ái Quốc." },
-        { q: "Hành trình tìm đường cứu nước của Nguyễn Ái Quốc và Phan Bội Châu có điểm tương đồng về", a: ["hướng đi tìm đường cứu nước.", "lựa chọn khuynh hướng cứu nước.", "chủ trương dựa vào Nhật Bản.", "mục đích cuối cùng."], c: "mục đích cuối cùng." },
-        { q: "Từ năm 1946 đến năm 1969, Hồ Chí Minh đảm nhận cương vị nào sau đây?", a: ["Chủ tịch nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Tổng Bí thư nước Việt Nam Dân chủ Cộng hòa.", "Tổng Bí thư nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Chủ tịch nước Việt Nam Dân chủ Cộng hòa."], c: "Chủ tịch nước Việt Nam Dân chủ Cộng hòa." },
-        { q: "Nội dung nào phản ánh không đúng vai trò của Hồ Chí Minh đối với cách mạng Việt Nam từ năm 1911 đến 1930?", a: ["Góp phần chấm dứt khủng hoảng về đường lối cứu nước ở Việt Nam.", "Lãnh đạo chính đảng cầm quyền thực hiện cuộc chiến tranh giải phóng.", "Chuẩn bị về chính trị, tư tưởng, tổ chức cho việc thành lập Đảng.", "Tìm thấy con đường giải phóng dân tộc."], c: "Lãnh đạo chính đảng cầm quyền thực hiện cuộc chiến tranh giải phóng." },
-        { q: "Chủ tịch Hồ Chí Minh đọc bản Tuyên ngôn độc lập năm 1945 trong bối cảnh nào?", a: ["Nước ta sạch bóng quân thù.", "Quân Đồng minh chưa tiến vào Đông Dương.", "Nước ta có một chính phủ hợp hiến.", "Nhân dân ta đã giành được chính quyền."], c: "Nhân dân ta đã giành được chính quyền." },
-        { q: "Từ việc bản “Yêu sách của nhân dân An Nam không được Hội nghị Véc-xai (1919) chấp nhận, Nguyễn Ái Quốc rút ra kết luận: Muốn được giải phóng, các dân tộc thuộc địa", a: ["phải dựa vào sự giúp đỡ của các nước xã hội chủ nghĩa.", "chỉ có thể trông cậy vào lực lượng của bản thân mình.", "phải liên hệ mật thiết với phong trào công nhân quốc tế.", "chỉ có thể đi theo con đường cách mạng tư sản."], c: "chỉ có thể trông cậy vào lực lượng của bản thân mình." },
-        { q: "Hoạt động yêu nước của Nguyễn Tất Thành trong những năm 1911 - 1918 có ý nghĩa như thế nào?", a: ["Đặt cơ sở cho việc xác định con đường cứu nước mới.", "Xác định được con đường cứu nước đúng đắn cho dân tộc.", "Chuẩn bị điều kiện về tổ chức cho sự ra đời của Đảng Cộng sản.", "Chuẩn bị điều kiện để thành lập Hội Việt Nam Cách mạng thanh niên."], c: "Đặt cơ sở cho việc xác định con đường cứu nước mới." }
+    const quizData = [
+        { lesson: "BÀI 10: ĐỔI MỚI ĐẤT NƯỚC ĐI LÊN CHỦ NGHĨA XÃ HỘI (1986-2000)", 
+          questions: [
+            { q: "Đường lối đổi mới của Đảng cộng sản Việt Nam đề ra lần đầu tiên tại", a: ["Đại hội Đảng toàn quốc lần thứ IV.", "Đại hội Đảng toàn quốc lần thứ V.", "Đại hội Đảng toàn quốc lần thứ VI.", "Đại hội Đảng toàn quốc lần thứ VII."], c: "Đại hội Đảng toàn quốc lần thứ VI." },
+            { q: "Đặng Cộng sản Việt Nam tiến hành công cuộc đổi mới nhằm", a: ["khắc phục sai lầm khuyết điểm, đưa đất nước vượt qua khủng hoảng", "đưa đất nước hội nhập với xu thế phát triển của thế giới", "thu hút vốn đầu tư, kĩ thuật của nước ngoài, phát triển kinh tế đối ngoại", "thu hút vốn đầu tư, kĩ thuật của nước ngoài, đưa đất nước nhanh chóng trở thành nước công nghiệp"], c: "khắc phục sai lầm khuyết điểm, đưa đất nước vượt qua khủng hoảng" },
+            { q: "Trong những năm 80 của thế kỷ XX, tác động lớn nhất của tình hình thế giới đến công cuộc đổi mới của Việt Nam là", a: ["Cuộc khủng hoảng toàn diện, trầm trọng của các nước tư bản chủ nghĩa do tác động của cuộc khủng hoảng năng lượng.", "Chính sách diễn biến hòa bình của Hoa Kì.", "Cuộc khủng hoảng toàn diện, trầm trọng của Liên Xô, các nước xã hội chủ nghĩa", "Cuộc chiến tranh lạnh chấm dứt."], c: "Cuộc khủng hoảng toàn diện, trầm trọng của Liên Xô, các nước xã hội chủ nghĩa" },
+            { q: "Đổi mới đất nước đi lên CNXH không phải là thay đổi", a: ["Lí tưởng của CNXH", "Lí luận chủ nghĩa Mác- Lênin.", "Con đường tiến lên CNXH.", "Mục tiêu của CNXH."], c: "Mục tiêu của CNXH." },
+            { q: "Nội dung của ba chương trình kinh tế lớn được Đảng đề ra trong kế hoạch 5 năm 1986- 1990 là", a: ["công, nông, ngư nghiệp.", "lương thực, thực phẩm, hàng tiêu dùng, hàng xuất khẩu.", "công nghiệp, nông nghiệp, thương mại dịch vụ.", "công nghiệp, nông nghiệp, xây dựng"], c: "lương thực, thực phẩm, hàng tiêu dùng, hàng xuất khẩu." },
+            { q: "Đảng Cộng sản Việt Nam phải tiếp tục hoàn thiện, bổ sung đường lối Đổi mới được đề ra từ Đại hội đại biểu toàn quốc lần thứ VI (1986) xuất phát từ", a: ["yêu cầu phù hợp với thực tế.", "điểm xuất phát còn quá thấp.", "đảm bảo an ninh - quốc phòng.", "yêu cầu của Trung Quốc."], c: "yêu cầu phù hợp với thực tế." },
+            { q: "Đại hội đại biểu toàn quốc lần thứ VIII của Đảng Cộng sản Việt Nam đã xác định nội dung nào sau đây là quốc sách hàng đầu?", a: ["Khoa học, giáo dục.", "Kinh tế và chính trị.", "An ninh, quốc phòng.", "Giáo dục và đào tạo."], c: "Giáo dục và đào tạo." },
+            { q: "Đảng Cộng sản Việt Nam tiến hành công cuộc đổi mới đất nước từ tháng 12/1986 trong bối cảnh", a: ["Hệ thống xã hội chủ nghĩa thế giới hình thành.", "Mỹ đã phá thế bao vây, cấm vận với Việt Nam.", "Đất nước đang trên đà phát triển rất mạnh mẽ.", "Liên Xô đang tiến hành công cuộc cải tổ."], c: "Liên Xô đang tiến hành công cuộc cải tổ." },
+            { q: "Nhiệm vụ trung tâm của công cuộc Đổi mới ở Việt Nam trong giai đoạn 1996 - 2006 là", a: ["tiến hành một cách toàn diện và đồng bộ trên các lĩnh vực kinh tế, chính trị.", "gắn tăng trưởng, phát triển kinh tế với thực hiện tiến bộ và công bằng xã hội.", "đẩy mạnh công nghiệp hoá, hiện đại hoá và hội nhập kinh tế quốc tế.", "Chú trọng phát triển nền văn hoá tiên tiến, đậm đà bản sắc dân tộc."], c: "đẩy mạnh công nghiệp hoá, hiện đại hoá và hội nhập kinh tế quốc tế." },
+            { q: "Trong sự nghiệp đổi mới đất nước (từ năm 1986), Việt Nam có chủ trương nào sau đây?", a: ["Phát triển kinh tế kế hoạch hóa tập trung.", "Tập trung cải tạo công thương nghiệp.", "Xóa bỏ sự tồn tại của thị trường tự do.", "Mở rộng quan hệ kinh tế đối ngoại."], c: "Mở rộng quan hệ kinh tế đối ngoại." }
+          ]
+        },
+        { lesson: "BÀI 11: THÀNH TỰU CỦA CÔNG CUỘC ĐỔI MỚI",
+          questions: [
+            { q: "Về chính trị, trong thời kì Đổi mới, Việt Nam đã đạt được thành tựu tiêu biểu nào sau đây?", a: ["Xây dựng Nhà nước pháp quyền xã hội chủ nghĩa.", "Xây dựng được mô hình Nhà nước chuyên chính vô sản.", "Xoá bỏ chế độ phong kiến, xây dựng chế độ mới, dân chủ.", "Thay đổi phương hướng tiến lên chủ nghĩa xã hội."], c: "Xây dựng Nhà nước pháp quyền xã hội chủ nghĩa." },
+            { q: "Cơ cấu các ngành kinh tế của Việt Nam năm 2020 là", a: ["nông nghiệp – công nghiệp và xây dựng – dịch vụ và thương mại.", "công nghiệp nhẹ và khai thác khoáng sản – nông nghiệp - dịch vụ.", "dịch vụ – công nghiệp và xây dựng – nông nghiệp, lâm nghiệp và thuỷ sản.", "công nghiệp, xây dựng và khai thác khoáng sản - thương mại - dịch vụ."], c: "dịch vụ – công nghiệp và xây dựng – nông nghiệp, lâm nghiệp và thuỷ sản." },
+            { q: "Trong thời kì Đôi mới, Việt Nam đạt được thành tựu văn hoá – xã hội nào sau đây?", a: ["Giải quyết được vấn đề lao động và việc làm.", "Xoá bỏ được tình trạng lao động thất nghiệp.", "Chỉ số phát triển con người đứng đầu ASEAN.", "Miễn phí mọi chi phí về y tế cho nhân dân."], c: "Giải quyết được vấn đề lao động và việc làm." },
+            { q: "Thực tiễn của công cuộc đổi mới đất nước (từ năm 1986) đã để lại bài học kinh nghiệm gì cho công cuộc xây dựng và bảo vệ tổ quốc hiện nay?", a: ["Kiên trì mục tiêu độc lập dân tộc và chủ nghĩa xã hội.", "Dựa hoàn toàn vào nội lực để phát triển đất nước.", "Đổi mới phải toàn diện nhưng trọng tâm là đổi mới chính trị.", "Phát huy vai trò chủ động, sáng tạo của giai cấp công nhân."], c: "Kiên trì mục tiêu độc lập dân tộc và chủ nghĩa xã hội." },
+            { q: "Một trong những thành tựu quan trọng nhất của công cuộc Đổi mới ở Việt Nam là", a: ["đưa đất nước trở thành nước đang phát triển có thu nhập cao.", "đưa đất nước trở thành nước phát triển có thu nhập trung bình.", "đưa đất nước vượt qua khủng hoảng về văn hoá – xã hội.", "đưa đất nước vượt qua khủng hoảng về kinh tế – xã hội."], c: "đưa đất nước vượt qua khủng hoảng về kinh tế – xã hội." },
+            { q: "Một trong những thành tựu lớn của công cuộc Đổi mới ở Việt Nam là", a: ["từng bước hình thành và hoàn thiện hệ thống chính quyền cơ sở ở các địa phương.", "từng bước hình thành và phát triển nền kinh tế thị trường định hướng xã hội chủ nghĩa.", "hoàn thành mục tiêu xoá đói, giảm nghèo ở các địa phương vùng sâu, vùng xa.", "xây dựng thành công nên văn hoá tiên tiến, đậm đà bản sắc dân tộc."], c: "từng bước hình thành và phát triển nền kinh tế thị trường định hướng xã hội chủ nghĩa." },
+            { q: "Nền văn hóa tiên tiến, đậm đà bản sắc dân tộc trong thời kỳ Đổi mới ở Việt Nam chú trọng điều gì?", a: ["Bảo tồn và phát huy giá trị văn hóa truyền thống", "Xây dựng nhiều trung tâm thương mại", "Tăng cường nhập khẩu sản phẩm văn hóa từ nước ngoài", "Đẩy mạnh giao lưu văn hóa với các nước tư bản"], c: "Bảo tồn và phát huy giá trị văn hóa truyền thống" },
+            { q: "Quá trình nào sau đây cho thấy công cuộc Đổi mới ở Việt Nam hiện nay đang tiếp tục được đẩy mạnh?", a: ["Hoàn thành cải cách nền giáo dục.", "Hội nhập quốc tế toàn diện, sâu rộng.", "Hoàn thành quá trình hội nhập khu vực về văn hoá.", "Thoát khỏi khủng hoảng nợ công ở khu vực và toàn cầu."], c: "Hội nhập quốc tế toàn diện, sâu rộng." },
+            { q: "Việc đổi mới toàn diện đất nước ở Việt Nam từ năm 1986 đã có tác động như thế nào đến vị thế của Việt Nam trên trường quốc tế?", a: ["Tăng cường quan hệ với các nước tư bản chủ nghĩa", "Việt Nam trở thành thành viên của các tổ chức quốc tế quan trọng như ASEAN và WTO", "Việt Nam giảm sự phụ thuộc vào các nước xã hội chủ nghĩa", "Việt Nam không thay đổi vị thế trên trường quốc tế"], c: "Việt Nam trở thành thành viên của các tổ chức quốc tế quan trọng như ASEAN và WTO" },
+            { q: "Bài học kinh nghiệm cơ bản nào được Đảng Cộng sản Việt Nam rút ra trong quá trình tổ chức và lãnh đạo đất nước từ công cuộc đổi mới (12-1986) đến nay?", a: ["Kết hợp giữa sức mạnh dân tộc với sức mạnh thời đại.", "Phát huy tối đa sức mạnh đại đoàn kết toàn dân tộc.", "Tôn trọng quy luật kinh tế - xã hội, bám sát thực tiễn đề ra chủ trương phù hợp.", "Tăng cường sự lãnh đạo của Đảng, Nhà nước đối với cách mạng Việt Nam."], c: "Tôn trọng quy luật kinh tế - xã hội, bám sát thực tiễn đề ra chủ trương phù hợp." }
+          ]
+        },
+        { lesson: "BÀI 12: HOẠT ĐỘNG ĐỐI NGOẠI CỦA VIỆT NAM ĐẦU THẾ KỶ XX",
+          questions: [
+            { q: "Đầu thế kỉ XX, một số nhà yêu nước Việt Nam đã có những hoạt động đối ngoại bước đầu nhằm mục tiêu", a: ["thống nhất đất nước", "Giải phóng giai cấp", "Đi lên chủ nghĩa xã hội", "Giải phóng dân tộc."], c: "Giải phóng dân tộc." },
+            { q: "Trong giai đoạn 1905 – 1909, Phan Bội Châu có hoạt động đối ngoại nào sau đây?", a: ["Tổ chức phong trào Duy Tân", "Tổ chức phong trào Đông du", "Cầu viện sự giúp đỡ của Pháp.", "Cầu viện sự giúp đỡ của Anh."], c: "Tổ chức phong trào Đông du" },
+            { q: "Trong giai đoạn 1941 – 1945, Đảng Cộng sản Đông Dương đã có nhiều hoạt động đối ngoại nhằm tranh thủ sự ủng hộ của lực lượng", a: ["Đồng minh", "phát xít", "quân phiệt", "phong kiến"], c: "Đồng minh" },
+            { q: "Trong giai đoạn 1930 – 1940, Đảng Cộng sản Đông Dương đã duy trì quan hệ với tổ chức nào sau đây?", a: ["Liên minh châu Âu.", "Liên hợp quốc.", "Quốc tế Cộng sản.", "Hiệp hội các quốc gia Đông Nam Á."], c: "Quốc tế Cộng sản." },
+            { q: "Đầu thế kỉ XX, Phan Châu Trinh có hoạt động đối ngoại nào sau đây?", a: ["Đề nghị Pháp cải cách chế độ cai trị", "Sáng lập Hội Liên hiệp thuộc địa.", "Khởi xướng phong trào Đông Du.", "Sáng lập Đảng Cộng sản Pháp."], c: "Đề nghị Pháp cải cách chế độ cai trị" },
+            { q: "Mục đích thực hiện các hoạt động đối ngoại của Phan Chu Trinh là", a: ["vận động cải cách và duy tân.", "tiến hành khởi nghĩa vũ trang.", "tập hợp lực lượng cách mạng.", "xin viện trợ các nước châu Âu."], c: "vận động cải cách và duy tân." },
+            { q: "Một trong những nội dung thể hiện sự khác biệt về đối tượng của các hoạt động đối ngoại giữa Phan Bội Châu và Nguyễn Ái Quốc là", a: ["Nguyễn Ái Quốc đi sang phương Tây.", "Phan Bội Châu trông cậy vào Nhật Bản.", "không có sự ảo tưởng vào thực dân Pháp.", "khuynh hướng cứu nước dân chủ tư sản."], c: "Phan Bội Châu trông cậy vào Nhật Bản." },
+            { q: "Hoạt động đối ngoại của Phan Bội Châu đầu thế kỉ XX chủ yếu diễn ra ở những quốc gia nào sau đây?", a: ["Nhật Bản, Trung Quốc", "Trung Quốc, Ấn Độ", "Anh, Pháp", "Liên Xô, Mỹ"], c: "Nhật Bản, Trung Quốc" },
+            { q: "Năm 1919, Nguyễn Ái Quốc có hoạt động đối ngoại nào sau đây?", a: ["Sang Liên Xô dự lễ tang Lênin, nghiên cứu chủ nghĩa Mác.", "Tham dự Đại hội Tua, bỏ phiếu tán thành gia nhập Quốc tế Ba.", "Gửi bản yêu sách của Nhân dân An Nam đến hội nghị Véc-xai.", "Tham gia đoàn cố vấn cao cấp của Liên Xô đến Trung Quốc."], c: "Gửi bản yêu sách của Nhân dân An Nam đến hội nghị Véc-xai." },
+            { q: "Hoạt động đối ngoại của Phan Bội Châu và Phan Châu Trinh đầu thế kỉ XX đều nhằm mục đích nào sau đây?", a: ["Tranh thủ sự giúp đỡ đối với cách mạng trong nước.", "Liên minh với nước ngoài chống chiến tranh thế giới.", "Đoàn kết quốc tế chống chủ nghĩa ly khai, khủng bỏ.", "Thành lập mặt trận chung chống đế quốc Mỹ xâm lược."], c: "Tranh thủ sự giúp đỡ đối với cách mạng trong nước." }
+          ]
+        },
+        { lesson: "BÀI 13: HOẠT ĐỘNG ĐỐI NGOẠI CỦA VIỆT NAM TỪ NĂM 1945 ĐẾN NAY",
+          questions: [
+            { q: "Một trong những quốc gia Việt Nam đã bình thường hóa quan hệ ngoại giao từ sau 1986 đến nay là", a: ["Mỹ.", "Ấn Độ.", "Nga.", "Lào."], c: "Mỹ." },
+            { q: "Từ năm 1986 đến nay, Việt Nam đã ký các hiệp ước về biên giới trên đất liền với quốc gia nào sau đây?", a: ["Trung Quốc.", "Hàn Quốc.", "Liên Xô.", "Triều Tiên."], c: "Trung Quốc." },
+            { q: "Năm 1950, quốc gia đầu tiên trên thế giới thiết lập quan hệ ngoại giao với nước Việt Nam Dân chủ Cộng hoà là:", a: ["Liên Xô.", "Trung Quốc.", "Cộng hoà Dân chủ Đức.", "Cộng hoà Liên bang Đức."], c: "Trung Quốc." },
+            { q: "Nhà nước Việt Nam Dân chủ Cộng hoà sau khi mới ra đời đã thực hiện các hoạt động đối ngoại nhằm", a: ["bảo vệ chính quyền, thống nhất đất nước, hoàn thành cách mạng dân tộc dân chủ nhân dân.", "tranh thủ sự ủng hộ của quốc tế đối với sự nghiệp đấu tranh bảo vệ độc lập dân tộc.", "tránh đối đầu cùng lúc nhiều kẻ thù, từng bước đánh bại quân Tưởng và Trung Hoa Dân Quốc.", "tránh chiến tranh, đàm phán thương lượng bằng mọi giá, đặc biệt là với Chính phủ Pháp."], c: "tranh thủ sự ủng hộ của quốc tế đối với sự nghiệp đấu tranh bảo vệ độc lập dân tộc." },
+            { q: "Sau sự kiện nào sau đây đã buộc Mỹ phải ngồi vào bàn đàm phán với Chính phủ nước Việt Nam Dân chủ Cộng hòa?", a: ["Vạn Tường.", "Đồng Xoài.", "cuộc tổng tiến công và nỗi dậy Mậu Thân.", "Núi Thành."], c: "cuộc tổng tiến công và nỗi dậy Mậu Thân." },
+            { q: "Sự phối hợp hoạt động ngoại giao giữa Việt Nam Dân chủ Cộng hòa và Chính phủ cách mạng lâm thời Cộng hòa miền Nam đã góp phần", a: ["thiết lập quan hệ ngoại giao với 20 quốc gia trên thế giới.", "buộc Mỹ phải kí Hiệp định Pa-ri về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam.", "tăng cường đoàn kết và giúp đỡ các nước xã hội chủ nghĩa.", "thúc đẩy hình thành mặt trận thế giới đoàn kết với các quốc gia."], c: "buộc Mỹ phải kí Hiệp định Pa-ri về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam." },
+            { q: "Nội dung nào dưới đây không phải là hoạt động đối ngoại của Việt Nam giai đoạn 1954-1964?", a: ["Thúc đẩy hình thành Mặt trận Tổ quốc Việt Nam.", "Đấu tranh chống lại các chính sách và hành động phá hoại hiệp định của Mỹ - Diệm.", "Tăng cường đoàn kết ba dân tộc Đông Dương.", "Mở rộng quan hệ với các nước xã hội chủ nghĩa và các nước vừa giành được độc lập."], c: "Thúc đẩy hình thành Mặt trận Tổ quốc Việt Nam." },
+            { q: "Các hoạt động đối ngoại mà nước Việt Nam dân chủ Cộng hòa tiến hành từ sau Cách mạng tháng Tám phải tuân thủ nguyên tắc nào sau đây?", a: ["Không vi phạm đến chủ quyền dân tộc.", "Không nhân nhượng thỏa hiệp với Pháp.", "Nhân nhượng tất cả yêu cầu của Tưởng.", "Giải quyết xung đột bằng thương lượng."], c: "Không vi phạm đến chủ quyền dân tộc." },
+            { q: "Nội dung nào sau đây thể hiện mục đích của việc Chủ tịch Hồ Chí Minh ký với Pháp bản Tạm ước ngày 14/9/1946", a: ["Kéo dài thời gian hòa bình để chuẩn bị kháng chiến.", "Tranh thủ thời gian để điều động bộ đội từ Nam ra.", "Đợi chi viện từ các nước xã hội chủ nghĩa.", "Tranh thủ khi lực lượng Pháp còn yếu để đàm phán."], c: "Kéo dài thời gian hòa bình để chuẩn bị kháng chiến." },
+            { q: "Thắng lợi nào sau đây đã buộc Mỹ phải chấp nhận ký Hiệp định Pa-ri?", a: ["Điện Biên Phủ trên không.", "Tiến công chiến lược 1972.", "Chiến dịch Huế-Đà Nẵng.", "Chiến dịch Hồ Chí Minh."], c: "Điện Biên Phủ trên không." }
+          ]
+        },
+        { lesson: "BÀI 14: LÃNH ĐẠO CÁCH MẠNG VIỆT NAM (HỒ CHÍ MINH)",
+          questions: [
+            { q: "Hồ Chí Minh lúc nhỏ tên là", a: ["Nguyễn Văn Ba.", "Nguyễn Sinh Sắc.", "Nguyễn Ái Quốc.", "Nguyễn Sinh Cung."], c: "Nguyễn Sinh Cung." },
+            { q: "Nội dung nào dưới đây không phải là hoạt động cách mạng của Hồ Chí Minh giai đoạn từ năm 1941 đến năm 1945?", a: ["Sáng lập Việt Nam độc lập đồng minh (Việt Minh).", "Ra Chỉ thị Đội Việt Nam Tuyên truyền Giải phóng quân.", "Lãnh đạo xây dựng và bảo vệ chính quyền, chống thù trong giặc ngoài.", "Đọc bản Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hòa."], c: "Lãnh đạo xây dựng và bảo vệ chính quyền, chống thù trong giặc ngoài." },
+            { q: "Từ năm 1945 đến năm 1969, Hồ Chí Minh đảm nhận cương vị nào sau đây?", a: ["Chủ tịch nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Tổng Bí thư nước Việt Nam Dân chủ Cộng hòa.", "Tổng Bí thư nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Chủ tịch nước Việt Nam Dân chủ Cộng hòa."], c: "Chủ tịch nước Việt Nam Dân chủ Cộng hòa." },
+            { q: "Chủ tịch Hồ Chí Minh xuất thân trong một gia đình", a: ["nhà nho yêu nước.", "tiểu tư sản trí thức.", "bần cố nông.", "tư sản dân tộc."], c: "nhà nho yêu nước." },
+            { q: "Văn kiện nào sau đây được Nguyễn Ái Quốc thay mặt những người Việt Nam yêu nước ở Pháp gửi đến Hội nghị Véc-xai năm 1919?", a: ["Tuyên ngôn Quốc tế Nhân quyền.", "Bản Yêu sách của nhân dân An Nam.", "Đường Kách mệnh.", "Bản án chế độ thực dân Pháp."], c: "Bản Yêu sách của nhân dân An Nam." },
+            { q: "Nội dung nào sau đây không phải là yếu tố ảnh hưởng đến quyết định ra đi tìm đường cứu nước của Nguyễn Tất Thành năm 1911?", a: ["Đất nước bị thực dân Pháp xâm lược, thống trị.", "Sự thất bại, bế tắc của các phong trào yêu nước.", "Ý chí, quyết tâm cứu nước của Nguyễn Tất Thành.", "Tác động của cuộc Cách mạng tháng Mười Nga."], c: "Tác động của cuộc Cách mạng tháng Mười Nga." },
+            { q: "Nguyễn Ái Quốc đã tìm ra con đường cứu nước, giải phóng dân tộc Việt Nam khi đang hoạt động ở đâu?", a: ["Anh.", "Pháp.", "Mỹ.", "Trung Quốc."], c: "Pháp." },
+            { q: "Tháng 12-1920 đánh dấu bước ngoặt trong cuộc đời hoạt động của Nguyễn Ái Quốc với việc người trở thành:", a: ["người cộng sản đầu tiên của Việt Nam.", "lãnh tụ của cách mạng Việt Nam.", "đảng viên của Đảng Cộng sản Việt Nam.", "Chủ tịch nước Việt Nam Dân chủ Cộng hòa."], c: "người cộng sản đầu tiên của Việt Nam." },
+            { q: "Yếu tố quyết định đến sự lựa chọn khuynh hướng cứu nước của Nguyễn Ái Quốc năm 1920 là", a: ["hoàn cảnh đất nước mất độc lập, chủ quyền.", "tác động của thế kỉ giải trừ chủ nghĩa thực dân.", "sự thất bại của khuynh hướng cứu nước tư sản.", "tầm nhìn, trí tuệ và bản lĩnh của Nguyễn Ái Quốc."], c: "tầm nhìn, trí tuệ và bản lĩnh của Nguyễn Ái Quốc." },
+            { q: "Đầu năm 1930, Nguyễn Ái Quốc phải tiến hành triệu tập hội nghị để hợp nhất các tổ chức cộng sản là do:", a: ["cách mạng Việt Nam đứng trước nguy cơ chia rẽ.", "thực hiện chỉ đạo trực tiếp của Quốc tế cộng sản.", "thực hiện yêu cầu của nhân dân ba nước Đông Dương.", "thực hiện yêu cầu của đại diện ba tổ chức cộng sản."], c: "cách mạng Việt Nam đứng trước nguy cơ chia rẽ." },
+            { q: "Trong hành trình tìm đường cứu nước, từ năm 1912 đến năm 1930, Nguyễn Tất Thành không đặt chân đến quốc gia nào sau đây?", a: ["Trung Quốc.", "Liên Xô.", "Nhật Bản.", "Thái Lan."], c: "Nhật Bản." },
+            { q: "Nguyễn Tất Thành tham gia hoạt động trong tổ chức nào sau đây ở Pháp năm 1918?", a: ["Đảng Xã hội Pháp.", "Hội liên hiệp thuộc địa.", "Đảng Dân chủ.", "Đảng Cộng sản Pháp."], c: "Đảng Xã hội Pháp." },
+            { q: "Nguyễn Ái Quốc lấy tên gọi Hồ Chí Minh lần đầu tiên khi", a: ["sang Xiêm hoạt động trong cộng đồng Việt kiều yêu nước (1928).", "bi bị chính quyền Anh bắt giam ở Hồng Công (1931).", "hoạt động ở Trung Quốc, chuẩn bị về nước (1938).", "sang Trung Quốc để vận động ngoại giao (1942)."], c: "sang Trung Quốc để vận động ngoại giao (1942)." },
+            { q: "Nguyên nhân quyết định thành công của hội nghị thành lập Đảng Cộng sản Việt Nam (đầu năm 1930) là", a: ["do tài năng, uy tín của Nguyễn Ái Quốc.", "sự chỉ đạo kịp thời của Đảng cộng sản Pháp.", "sự giúp đỡ của Lê-nin và Quốc tế cộng sản.", "nguyện vọng của các tổ chức cộng sản."], c: "do tài năng, uy tín của Nguyễn Ái Quốc." },
+            { q: "Hành trình tìm đường cứu nước của Nguyễn Ái Quốc và Phan Bội Châu có điểm tương đồng về", a: ["hướng đi tìm đường cứu nước.", "lựa chọn khuynh hướng cứu nước.", "chủ trương dựa vào Nhật Bản.", "mục đích cuối cùng."], c: "mục đích cuối cùng." },
+            { q: "Từ năm 1946 đến năm 1969, Hồ Chí Minh đảm nhận cương vị nào sau đây?", a: ["Chủ tịch nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Tổng Bí thư nước Việt Nam Dân chủ Cộng hòa.", "Tổng Bí thư nước Cộng hòa xã hội chủ nghĩa Việt Nam.", "Chủ tịch nước Việt Nam Dân chủ Cộng hòa."], c: "Chủ tịch nước Việt Nam Dân chủ Cộng hòa." },
+            { q: "Nội dung nào phản ánh không đúng vai trò của Hồ Chí Minh đối với cách mạng Việt Nam từ năm 1911 đến 1930?", a: ["Góp phần chấm dứt khủng hoảng về đường lối cứu nước ở Việt Nam.", "Lãnh đạo chính đảng cầm quyền thực hiện cuộc chiến tranh giải phóng.", "Chuẩn bị về chính trị, tư tưởng, tổ chức cho việc thành lập Đảng.", "Tìm thấy con đường giải phóng dân tộc."], c: "Lãnh đạo chính đảng cầm quyền thực hiện cuộc chiến tranh giải phóng." },
+            { q: "Chủ tịch Hồ Chí Minh đọc bản Tuyên ngôn độc lập năm 1945 trong bối cảnh nào?", a: ["Nước ta sạch bóng quân thù.", "Quân Đồng minh chưa tiến vào Đông Dương.", "Nước ta có một chính phủ hợp hiến.", "Nhân dân ta đã giành được chính quyền."], c: "Nhân dân ta đã giành được chính quyền." },
+            { q: "Từ việc bản “Yêu sách của nhân dân An Nam không được Hội nghị Véc-xai (1919) chấp nhận, Nguyễn Ái Quốc rút ra kết luận: Muốn được giải phóng, các dân tộc thuộc địa", a: ["phải dựa vào sự giúp đỡ của các nước xã hội chủ nghĩa.", "chỉ có thể trông cậy vào lực lượng của bản thân mình.", "phải liên hệ mật thiết với phong trào công nhân quốc tế.", "chỉ có thể đi theo con đường cách mạng tư sản."], c: "chỉ có thể trông cậy vào lực lượng của bản thân mình." },
+            { q: "Hoạt động yêu nước của Nguyễn Tất Thành trong những năm 1911 - 1918 có ý nghĩa như thế nào?", a: ["Đặt cơ sở cho việc xác định con đường cứu nước mới.", "Xác định được con đường cứu nước đúng đắn cho dân tộc.", "Chuẩn bị điều kiện về tổ chức cho sự ra đời của Đảng Cộng sản.", "Chuẩn bị điều kiện để thành lập Hội Việt Nam Cách mạng thanh niên."], c: "Đặt cơ sở cho việc xác định con đường cứu nước mới." }
+          ]
+        }
     ];
 
-    let quizData = [];
+    let flatQuestions = [];
 
-    function shuffleArray(array) {
+    function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
-    function initQuiz() {
-        const container = document.getElementById('quiz-container');
-        container.innerHTML = '';
-        
-        // Trộn câu hỏi
-        quizData = [...data];
-        shuffleArray(quizData);
+    function init() {
+        const container = document.getElementById('main-quiz');
+        let totalCounter = 0;
 
-        quizData.forEach((item, index) => {
-            // Trộn đáp án
-            let options = [...item.a];
-            shuffleArray(options);
-            
-            item.shuffledOptions = options;
-            item.userAnswer = null;
+        quizData.forEach((lesson) => {
+            const lessonDiv = document.createElement('div');
+            lessonDiv.className = 'lesson-section';
+            lessonDiv.innerHTML = `<div class="lesson-header">${lesson.lesson}</div>`;
 
-            const card = document.createElement('div');
-            card.className = 'quiz-card';
-            card.innerHTML = `
-                <span class="q-header">Câu ${index + 1}: ${item.q}</span>
-                <div class="options-group" id="group-${index}">
-                    ${options.map((opt, optIdx) => `
-                        <div class="option" onclick="selectOption(${index}, ${optIdx}, this)">
-                            ${String.fromCharCode(65 + optIdx)}. ${opt}
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            container.appendChild(card);
+            lesson.questions.forEach((item) => {
+                const qIdx = totalCounter++;
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+
+                // Trộn đáp án
+                let options = [...item.a];
+                shuffle(options);
+                
+                flatQuestions.push({
+                    ...item,
+                    shuffledA: options,
+                    userA: null
+                });
+
+                card.innerHTML = `
+                    <span class="q-text">Câu ${qIdx + 1}: ${item.q}</span>
+                    <div class="options-group" id="qgroup-${qIdx}">
+                        ${options.map((opt, optIdx) => `
+                            <div class="option" onclick="select(${qIdx}, ${optIdx}, this)">
+                                ${String.fromCharCode(65 + optIdx)}. ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                lessonDiv.appendChild(card);
+            });
+            container.appendChild(lessonDiv);
         });
     }
 
-    function selectOption(qIdx, optIdx, element) {
-        const parent = document.getElementById(`group-${qIdx}`);
-        Array.from(parent.children).forEach(child => child.classList.remove('selected'));
-        element.classList.add('selected');
-        quizData[qIdx].userAnswer = quizData[qIdx].shuffledOptions[optIdx];
+    function select(qIdx, optIdx, el) {
+        const parent = document.getElementById(`qgroup-${qIdx}`);
+        Array.from(parent.children).forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        flatQuestions[qIdx].userA = flatQuestions[qIdx].shuffledA[optIdx];
     }
 
-    function checkAnswers() {
-        let score = 0;
-        quizData.forEach((item, index) => {
-            const parent = document.getElementById(`group-${index}`);
-            const options = Array.from(parent.children);
+    function checkAll() {
+        let correct = 0;
+        flatQuestions.forEach((item, idx) => {
+            const parent = document.getElementById(`qgroup-${idx}`);
+            const divs = Array.from(parent.children);
 
-            options.forEach((optDiv, optIdx) => {
-                const optText = item.shuffledOptions[optIdx];
-                if (optText === item.c) optDiv.classList.add('correct');
-                if (item.userAnswer === optText && optText !== item.c) optDiv.classList.add('wrong');
+            divs.forEach((div, dIdx) => {
+                const text = item.shuffledA[dIdx];
+                if (text === item.c) div.classList.add('correct');
+                if (item.userA === text && text !== item.c) div.classList.add('wrong');
             });
 
-            if (item.userAnswer === item.c) score++;
+            if (item.userA === item.c) correct++;
         });
 
-        const result = document.getElementById('result');
-        result.style.display = 'block';
-        result.innerHTML = `KẾT QUẢ: ${score} / ${quizData.length} CÂU ĐÚNG`;
+        const summary = document.getElementById('result-summary');
+        summary.style.display = 'block';
+        summary.innerHTML = `🏁 Kết quả: <b>${correct}/${flatQuestions.length}</b> câu đúng.`;
         window.scrollTo({ top: 0, behavior: 'smooth' });
         document.getElementById('submit-btn').disabled = true;
     }
 
-    initQuiz();
+    init();
 </script>
+
 </body>
 </html>
